@@ -1,79 +1,15 @@
-package main
+package parser
 
 import (
-   "os"
-   "fmt"
-   "log"
-   "encoding/binary" 
-   "strconv"
-   "time"
+    "os"
+    "fmt"
+    "log"
+    "encoding/binary" 
+    "strconv"
+    "time"
 )
 
-func main() { 
-				
-		// input file 
-		if len(os.Args) == 2 {
-		  inputFilePath := os.Args[1] 
-		   
-		  // GHL 
-		  fmt.Println("\nGHL file...")
-		
-	      fileGHL, err := os.Open(inputFilePath + ".GHL")	
-	      if err != nil {
-	          log.Fatal("Error while opening file")
-	      }
-          
-	      defer fileGHL.Close() 
-          
-   		  bytesGHL := splitFileToSlice(fileGHL, 48)  		
-		  for i := range bytesGHL {
-		          parseGHL(bytesGHL[i]) 
-		  		fmt.Println("---")
-		  } 
-          
-		  // GHT 
-		  fmt.Println("\nGHT file...")
-          
-	      fileGHT, err := os.Open(inputFilePath + ".GHT")
-	      if err != nil {
-	          log.Fatal("Error while opening file", err)
-	      }
-          
-	      defer fileGHT.Close() 
-          
-		  infoGHT, _ := fileGHT.Stat()                       
-		  var sizeGHT int64 = infoGHT.Size() 
-          
-		  bytesGHT := make([]byte, sizeGHT)             
-          _, errGHT := fileGHT.Read(bytesGHT) 
-    	  if errGHT != nil {
-	          log.Fatal("Error while opening file", errGHT)
-	      }
-          
-		  parseGHT(bytesGHT)	
-          
-		  // GHP 
-		  fmt.Println("\nGHP file...")
-          
-		  fileGHP, err := os.Open(inputFilePath + ".GHP")
-		  if err != nil {
-		      log.Fatal("Error while opening file", err)
-		  }
-          
-		  defer fileGHP.Close() 
-          
-		  bytesGHP := splitFileToSlice(fileGHP, 20)  		
-		  for i := range bytesGHP {
-		          parseGHP(bytesGHP[i]) 
-		  		fmt.Println("---")
-		  }				
-		} else {
-   	        log.Fatal("you must specify the path to an input GHL/GHP/GHT file") 
-			os.Exit(1)
-		}  	     		
-} 
-
-func parseFilename(file_name string) time.Time {
+func ParseFilename(file_name string) time.Time {
 	year, _ := strconv.ParseInt(file_name[0:1], 36, 32)
     month, _ := strconv.ParseInt(file_name[1:2], 36, 32)
     day, _ := strconv.ParseInt(file_name[2:3], 36, 32)
@@ -85,7 +21,7 @@ func parseFilename(file_name string) time.Time {
 	return time_session
 } 
 
-func splitFileToSlice(file *os.File, off int) [][]byte {
+func SplitFileToSlice(file *os.File, off int) [][]byte {
 	// calculate the bytes size                
 	info, _ := file.Stat()                   
 	var size int64 = info.Size()               
@@ -107,7 +43,7 @@ func splitFileToSlice(file *os.File, off int) [][]byte {
     return s 
 } 
 
-func parseGHL(data []byte) {
+func ParseGHL(data []byte) {
 	 // totalTime
 		totalTime := binary.LittleEndian.Uint32(data[4:8])
 		fmt.Printf("=> totalTime :%f\n", float64(totalTime) / 10)
@@ -157,7 +93,7 @@ func parseGHL(data []byte) {
 		fmt.Println("=> endPoint :", endPoint)	
 } 
 
-func parseGHT(data []byte) { 
+func ParseGHT(data []byte) { 
  		//totalPoint 
 		totalPoint := binary.LittleEndian.Uint16(data[6:8])  
  		fmt.Printf("=> totalPoint :%d\n", int(totalPoint))
@@ -215,7 +151,7 @@ func parseGHT(data []byte) {
 		fmt.Printf("=> trainingName : %s\n", trainingName)
 }  
 
-func parseGHP(data []byte) { 
+func ParseGHP(data []byte) { 
 		//latitude 
 		latitude := binary.LittleEndian.Uint32(data[0:4]) 
 		fmt.Printf("=> latitude :%f\n", float64(latitude) / 1000000)
@@ -239,4 +175,4 @@ func parseGHP(data []byte) {
 		//status 
 		status := data[13]	
 		fmt.Printf("=> status :%d\n", status)
-} 
+}
